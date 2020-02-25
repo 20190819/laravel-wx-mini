@@ -1,0 +1,65 @@
+<?php
+
+namespace DummyNamespace;
+
+use App\Models\WxUser;
+use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
+use Sczts\WxMini\Facades\WxMini;
+use Sczts\WxMini\Facades\WxMiniAuth;
+
+class DummyClass extends Controller
+{
+    protected static $expire = '7*24*60';  // 单位:/min
+
+    // 登陆
+    public function login(Request $request)
+    {
+        $code = $request->input('code');
+        $encryptedData = $request->input('encryptedData');
+        $iv = $request->input('iv');
+        $user_info_arr = WxMini::userInfo($code, $encryptedData, $iv);
+        $session_key = Arr::pull($user_info_arr, 'session_key');
+        // 入库
+        $user = WxUser::query()->firstOrCreate(['openid' => $user_info_arr['openId']], $user_info_arr);
+        $cache_value = [
+            'user_id' => $user->id,
+            'openid' => $user_info_arr['openid'],
+            'session_key' => $session_key,
+            'expire_date' => now()->addMinutes(static::$expire)->toDateTimeString()
+        ];
+        $token_info = static::createToken(md5($user_info_arr['openid']), $cache_value);
+        //返回结果
+        return response()->json(['code' => 0, 'msg' => 'success', 'data' => $token_info]);
+    }
+
+    //  获取手机号
+    public function getPhoneNum(Request $request)
+    {
+        $iv = $request->input('iv');
+        $encryptedData = $request->input('encryptedData');
+        $auth_session = WxMiniAuth::authSession();
+        // 解密数据
+        $phone_arr = WxMini::phoneInfo($auth_session['session_key'], $iv, $encryptedData);
+        $phone = $phone_arr['phoneNumber'] ?? null;
+        if ($phone) {
+            // 入库
+            WxUser::query()->find(WxMiniAuth::id())->update(['phone' => $phone]);
+        }
+        //返回结果
+        return response()->json(['code' => 0, 'msg' => 'success']);
+    }
+
+
+    protected static function createToken($cache_key, $cache_value): array
+    {
+        Cache::put(WxMiniAuth::cachePrefix() . $cache_key, $cache_value, static::$expire);
+        return [
+            'tokenKey' => WxMiniAuth::tokenKey(),
+            'tokenValue' => encrypt($cache_key),
+            'expire_date' => $cache_value['expire_date'],
+            'expire_timestamp' => time() + 60 * (static::$expire)
+        ];
+    }
+}

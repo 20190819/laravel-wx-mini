@@ -1,0 +1,10 @@
+{
+    "name": "sczts/wx_mini",
+    "authors": {
+        "name": "yangl",
+        "email": "1034211002@qq.com"
+    },
+    "require": {
+        "overtrue/wechat": "~4.0"
+    }
+}

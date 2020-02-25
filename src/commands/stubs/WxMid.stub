@@ -1,0 +1,32 @@
+<?php
+
+namespace DummyNamespace;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Sczts\WxMini\Facades\WxMiniAuth;
+
+class DummyClass
+{
+
+    /**
+     * 验证微信登陆中间件
+     * @param Request $request
+     * @param Closure $next
+     * @return mixed
+     * @throws \Exception
+     */
+    public function handle(Request $request, Closure $next)
+    {
+        $we_token = $request->header(WxMiniAuth::tokenKey());
+        $decrypted = WxMiniAuth::decryptToken($we_token);
+        $auth_session = Cache::get(WxMiniAuth::cachePrefix() . $decrypted);
+
+        if (!$we_token || !$decrypted || !$auth_session) {
+            throw new \Exception('请登录再试...');
+        }
+        return $next($request);
+    }
+
+}
