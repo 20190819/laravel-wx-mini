@@ -33,7 +33,7 @@ class WxMiniServiceProvider extends ServiceProvider
     public function boot()
     {
         // 路由
-        $this->loadRoutesFrom(realpath(__DIR__.'/../route.php'));
+        $this->loadRoutesFrom(realpath(__DIR__ . '/../route.php'));
         $this->publishes([
             // 配置文件
             realpath(__DIR__ . '/../../config/wx_mini.php') => config_path('wx_mini.php'),
