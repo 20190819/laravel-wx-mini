@@ -11,7 +11,7 @@ use Sczts\WxMini\Facades\WxMiniAuth;
 
 class DummyClass extends Controller
 {
-    protected static $expire = '7*24*60';  // 单位:/min
+    protected static $expire = 7 * 24 * 60;  // 单位:/min
 
     // 登陆
     public function login(Request $request)
@@ -22,7 +22,7 @@ class DummyClass extends Controller
         $user_info_arr = WxMini::userInfo($code, $encryptedData, $iv);
         $session_key = Arr::pull($user_info_arr, 'session_key');
         // 入库
-        $user = WxUser::query()->firstOrCreate(['openid' => $user_info_arr['openId']], $user_info_arr);
+        $user = WxUser::query()->firstOrCreate(['openid' => $user_info_arr['openid']], $user_info_arr);
         $cache_value = [
             'user_id' => $user->id,
             'openid' => $user_info_arr['openid'],
@@ -51,9 +51,34 @@ class DummyClass extends Controller
         return response()->json(['code' => 0, 'msg' => 'success']);
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function logout()
+    {
+        // 退出
+        $cache_key = WxMiniAuth::cacheKey();
+        Cache::forget($cache_key);
+        return response()->json(['code' => 0, 'msg' => 'success']);
+    }
+
+    /**
+     * @param Request $request
+     * @return mixed
+     */
+    public function refreshToken(Request $request)
+    {
+        // 刷新token
+        $we_token = $request->header(WxMiniAuth::tokenKey(), '');
+        $decrypted = decrypt($we_token);
+        $refresh_token = static::createToken($decrypted, WxMiniAuth::authSession());
+        return response()->json(['code' => 0, 'msg' => 'success', ['data' => $refresh_token]]);
+    }
+
 
     protected static function createToken($cache_key, $cache_value): array
     {
+        // 内部方法
         Cache::put(WxMiniAuth::cachePrefix() . $cache_key, $cache_value, static::$expire);
         return [
             'tokenKey' => WxMiniAuth::tokenKey(),

@@ -18,7 +18,7 @@ class WxMini
 
     public function __construct()
     {
-        $config = config('wx_app');
+        $config = config('wx_mini');
         $this->wx_mini = Factory::miniProgram($config);
     }
 
@@ -34,9 +34,9 @@ class WxMini
     public function userInfo($code, $encryptedData, $iv): array
     {
         // 根据code 获取openid session_key
-        $auth_session = $this->wx_mini->auth->session($code);
+        $auth_session = $this->wx_mini->auth->session($code ?? '');
         if (isset($auth_session['errcode'])) {
-            throw new \Exception('openid || session_key 获取失败');
+            throw new \Exception('"openid" && "session_key" 获取失败');
         }
 
         // 消息解密
@@ -63,7 +63,7 @@ class WxMini
      * @return array
      * @throws \EasyWeChat\Kernel\Exceptions\DecryptException
      */
-    public function phoneInfo($session_key,$iv,$encryptedData):array
+    public function phoneInfo($session_key, $iv, $encryptedData): array
     {
         //  消息解密 手机号
         $decryptedData = $this->wx_mini->encryptor->decryptData($session_key, $iv, $encryptedData);
