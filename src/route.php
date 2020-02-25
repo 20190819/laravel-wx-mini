@@ -6,7 +6,7 @@
  * Time: 16:55
  */
 
-Route::post('wx/login', 'App\Http\Controllers\WxController@login');  //  登陆
+Route::post('api/wx/login', 'App\Http\Controllers\WxController@login');  //  登陆
 
 Route::group(['prefix' => 'api/wx', 'middleware' => 'wx_auth', 'namespace' => 'App\Http\Controllers'], function () {
     Route::get('logout', 'WxController@logout'); //  小程序-退出
