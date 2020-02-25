@@ -1,12 +1,13 @@
 <?php
 
-namespace Sczts\Wxmini\Providers;
+namespace Sczts\WxMini\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Sczts\WxMini\WxMiniAuth;
 
-class WxMiniAuthProvider extends ServiceProvider
+class WxMiniAuthServiceProvider extends ServiceProvider
 {
+    protected $defer=true;
     /**
      * Register services.
      *
