@@ -2,6 +2,7 @@
 
 namespace Sczts\WxMini\Providers;
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\ServiceProvider;
 use Sczts\WxMini\Commands\create\WxCtrl;
 use Sczts\WxMini\Commands\create\WxMid;
@@ -10,7 +11,6 @@ use Sczts\WxMini\WxMini;
 
 class WxMiniServiceProvider extends ServiceProvider
 {
-    protected $defer = true;
 
     /**
      * Register services.
@@ -39,7 +39,7 @@ class WxMiniServiceProvider extends ServiceProvider
             realpath(__DIR__ . '/../../config/wx_mini.php') => config_path('wx_mini.php'),
             // 迁移文件
             realpath(__DIR__ . '/../migrations/2020_02_25_021629_create_wx_users_table.php') => database_path('migrations/2020_02_25_021629_create_wx_users_table.php')
-        ], 'init');
+        ], 'wx_init');
 
         // 注册扩展包的 Artisan 命令
         if ($this->app->runningInConsole()) {
@@ -49,10 +49,7 @@ class WxMiniServiceProvider extends ServiceProvider
                 WxMid::class
             ]);
         }
+
     }
 
-    public function provides()
-    {
-        return [WxMini::class];
-    }
 }

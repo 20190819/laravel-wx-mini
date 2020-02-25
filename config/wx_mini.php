@@ -17,6 +17,6 @@ return [
 
     'log' => [
         'level' => 'debug',
-        'file' => storage_path('logs/weapp.log'),
+        'file' => storage_path('logs/wx.log'),
     ],
 ];

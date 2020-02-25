@@ -7,7 +7,7 @@ use Sczts\WxMini\WxMiniAuth;
 
 class WxMiniAuthServiceProvider extends ServiceProvider
 {
-    protected $defer=true;
+
     /**
      * Register services.
      *
@@ -30,8 +30,4 @@ class WxMiniAuthServiceProvider extends ServiceProvider
         //
     }
 
-    public function provides()
-    {
-        return [WxMiniAuth::class];
-    }
 }
